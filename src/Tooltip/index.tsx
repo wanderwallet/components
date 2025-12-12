@@ -2,25 +2,24 @@ import { PropsWithChildren, ReactNode, useId } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { Position, getPlace } from "./position";
 import styled from "styled-components";
+import { useTheme } from "styled-components";
 
 export function Tooltip({
   children,
   content,
   underline = false,
   position = "top",
+  style,
   ...props
 }: PropsWithChildren<TooltipProps>) {
   const tooltipId = useId();
+  const theme = useTheme();
   const place = getPlace(position);
+  const border = `1px solid ${theme.borderDefault}`;
 
   return (
     <>
-      <TooltipWrapper
-        data-tooltip-id={tooltipId}
-        data-tooltip-place={place}
-        data-tooltip-position-strategy="fixed"
-        underline={underline}
-      >
+      <TooltipWrapper data-tooltip-id={tooltipId} underline={underline}>
         {children}
       </TooltipWrapper>
       <StyledReactTooltip
@@ -28,6 +27,10 @@ export function Tooltip({
         place={place}
         opacity={1}
         positionStrategy="fixed"
+        delayShow={0.23}
+        delayHide={0.23}
+        border={border}
+        style={style}
         {...props}
       >
         {content}
@@ -40,6 +43,7 @@ export interface TooltipProps {
   content: ReactNode;
   position?: Position;
   underline?: boolean;
+  style?: React.CSSProperties;
 }
 
 const TooltipWrapper = styled.div<{ underline?: boolean }>`
@@ -53,8 +57,11 @@ const TooltipWrapper = styled.div<{ underline?: boolean }>`
 `;
 
 const StyledReactTooltip = styled(ReactTooltip)`
-  background-color: ${(props) => props.theme.backgroundSecondary} !important;
-  color: #ffffff !important;
+  background-color: ${(props) =>
+    props.theme.displayTheme === "light"
+      ? props.theme.surfaceDefault
+      : props.theme.backgroundSecondary} !important;
+  color: ${(props) => props.theme.primaryText} !important;
   padding: 10px 15px !important;
   border-radius: 10px !important;
   font-size: 14px !important;
@@ -63,9 +70,4 @@ const StyledReactTooltip = styled(ReactTooltip)`
   min-width: 109px !important;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14) !important;
   z-index: 99999 !important;
-  --rt-opacity: 1 !important;
-  opacity: 1 !important;
-
-  --rt-transition-show-delay: 0.23s;
-  --rt-transition-closing-delay: 0.23s;
 `;
